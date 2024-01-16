@@ -2,33 +2,39 @@ import React, { Component } from "react";
 import Loading from "./Loading";
 import Panel from "./Panel";
 import classnames from "classnames";
+import {
+  getTotalPhotos,
+  getTotalTopics,
+  getUserWithMostUploads,
+  getUserWithLeastUploads
+ } from "helpers/selectors";
 
 const data = [
   {
     id: 1,
     label: "Total Photos",
-    value: 10
+    getValue: getTotalPhotos,
   },
   {
     id: 2,
     label: "Total Topics",
-    value: 4
+    getValue: getTotalTopics,
   },
   {
     id: 3,
     label: "User with the most uploads",
-    value: "Allison Saeng"
+    getValue: getUserWithMostUploads,
   },
   {
     id: 4,
     label: "User with the least uploads",
-    value: "Lukas Souza"
+    getValue: getUserWithLeastUploads,
   }
 ];
 
 
 class Dashboard extends Component {
-  state = { loading : false, focused: null }; 
+  state = { loading : true, focused: null, photos: [], topics: [] }; 
    /* Binding 1. Instance Method */
 //    selectPanel(id) {
 //     this.setState({
@@ -51,7 +57,27 @@ class Dashboard extends Component {
 
       if (focused) {
        this.setState({ focused });
-     }
+      }
+
+      const urlsPromise = [
+        "/api/photos",
+        "/api/topics",
+      ].map(url => fetch(url).then(response => response.json()));
+
+      //fetching and parsing are both asynchronous. 
+      //We will need to wrap urlsPromise in a Promise.all. 
+      //Now, when the component mounts we will request our data. 
+      //After the data returns, we use this.setState to merge it into the existing state object.
+
+      Promise.all(urlsPromise)
+      .then(([photos, topics]) => {
+        this.setState({
+          loading: false,
+          photos: photos,
+          topics: topics
+        });
+      });
+
     }
 
    componentDidUpdate(previousProps, previousState) {
@@ -73,7 +99,7 @@ class Dashboard extends Component {
 
     const panels = (this.state.focused ? data.filter(panel => this.state.focused === panel.id) : data)
     .map((panel) => (
-      <Panel key={panel.id} id={panel.id} label={panel.label} value={panel.value} onSelect={(event)=>this.selectPanel(panel.id)} />)
+      <Panel key={panel.id} label={panel.label} value={panel.getValue(this.state)} onSelect={()=>this.selectPanel(panel.id)} />)
     );
 
     return <main className={dashboardClasses}>{panels}</main>;
