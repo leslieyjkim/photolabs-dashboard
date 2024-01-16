@@ -39,9 +39,9 @@ class Dashboard extends Component {
 
    /* Binding 2. Class Property with Arrow Function */
    selectPanel = id => {
-    this.setState({
-     focused: id
-    });
+    this.setState((previousState)=>({
+      focused: previousState.focused !== null ? null : id,
+    }));
   };
 
     render() {
