@@ -44,6 +44,26 @@ class Dashboard extends Component {
     }));
   };
 
+    // save to localStorage.
+    // if the values change, we write the value to localStorage.
+   componentDidMount() {
+      const focused = JSON.parse(localStorage.getItem("focused"));
+
+      if (focused) {
+       this.setState({ focused });
+     }
+    }
+
+   componentDidUpdate(previousProps, previousState) {
+     if (previousState.focused !== this.state.focused) {
+       localStorage.setItem("focused", JSON.stringify(this.state.focused)); 
+     }
+    }
+    //1.use the JSON.stringify function to convert our values before writing them to the localStorage.
+    //2.When we get the values out of storage, we use the JSON.parse function to convert the string back to JavaScript values. 
+    //3.This process of serialization allows us to save more complex data types in localStorage.
+
+
     render() {
     const dashboardClasses = classnames("dashboard", {"dashboard--focused": this.state.focused});
 
